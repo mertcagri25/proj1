@@ -24,14 +24,32 @@ namespace proj1.Controllers
             return View();
         }
 
+        [AcceptVerbs("GET", "POST")]
+        public IActionResult VerifyName(string name, int? id)
+        {
+            if (_context.Categories.Any(c => c.Name == name && (id == null || c.Id != id)))
+            {
+                return Json($"'{name}' zaten kullanımda.");
+            }
+
+            return Json(true);
+        }
+
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Add([Bind("Name,IsActive")] Category category)
         {
+            if (_context.Categories.Any(c => c.Name == category.Name))
+            {
+                ModelState.AddModelError("Name", "Bu kategori adı zaten mevcut.");
+            }
+
             if (ModelState.IsValid)
             {
                 _context.Add(category);
                 await _context.SaveChangesAsync();
+                TempData["Message"] = "Kategori başarıyla eklendi.";
+                TempData["Type"] = "success"; // Yeşil
                 return RedirectToAction(nameof(Index));
             }
             return View(category);
@@ -61,12 +79,19 @@ namespace proj1.Controllers
                 return NotFound();
             }
 
+            if (_context.Categories.Any(c => c.Name == category.Name && c.Id != id))
+            {
+                ModelState.AddModelError("Name", "Bu kategori adı zaten mevcut.");
+            }
+
             if (ModelState.IsValid)
             {
                 try
                 {
                     _context.Update(category);
                     await _context.SaveChangesAsync();
+                    TempData["Message"] = "Kategori başarıyla güncellendi.";
+                    TempData["Type"] = "warning"; // Sarı/Turuncu (Düzenleme için)
                 }
                 catch (DbUpdateConcurrencyException)
                 {
@@ -110,8 +135,25 @@ namespace proj1.Controllers
             {
                 _context.Categories.Remove(category);
                 await _context.SaveChangesAsync();
+                TempData["Message"] = "Kategori başarıyla silindi.";
+                TempData["Type"] = "error"; // Kırmızı (Silme için)
             }
             return RedirectToAction(nameof(Index));
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> ToggleStatus(int id)
+        {
+            var category = await _context.Categories.FindAsync(id);
+            if (category == null)
+            {
+                return NotFound();
+            }
+
+            category.IsActive = !category.IsActive;
+            await _context.SaveChangesAsync();
+
+            return Ok(new { success = true, message = "Durum güncellendi.", isActive = category.IsActive });
         }
 
         private bool CategoryExists(int id)

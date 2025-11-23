@@ -23,22 +23,24 @@ namespace proj1.Controllers
 
         public IActionResult Add()
         {
-            ViewData["CategoryId"] = new SelectList(_context.Categories, "Id", "Name");
+            ViewBag.Categories = new SelectList(_context.Categories, "Id", "Name");
             return View();
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Add([Bind("Title,Content,ImageUrl,IsPublished,CategoryId")] News news)
+        public async Task<IActionResult> Add([Bind("Title,Content,ImageUrl,CategoryId,IsPublished")] News news)
         {
             if (ModelState.IsValid)
             {
                 news.PublishDate = DateTime.Now;
                 _context.Add(news);
                 await _context.SaveChangesAsync();
+                TempData["Message"] = "Haber başarıyla eklendi.";
+                TempData["Type"] = "success";
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["CategoryId"] = new SelectList(_context.Categories, "Id", "Name", news.CategoryId);
+            ViewBag.Categories = new SelectList(_context.Categories, "Id", "Name", news.CategoryId);
             return View(news);
         }
 
@@ -54,13 +56,13 @@ namespace proj1.Controllers
             {
                 return NotFound();
             }
-            ViewData["CategoryId"] = new SelectList(_context.Categories, "Id", "Name", news.CategoryId);
+            ViewBag.Categories = new SelectList(_context.Categories, "Id", "Name", news.CategoryId);
             return View(news);
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Update(int id, [Bind("Id,Title,Content,ImageUrl,PublishDate,IsPublished,CategoryId")] News news)
+        public async Task<IActionResult> Update(int id, [Bind("Id,Title,Content,ImageUrl,CategoryId,IsPublished")] News news)
         {
             if (id != news.Id)
             {
@@ -71,8 +73,13 @@ namespace proj1.Controllers
             {
                 try
                 {
+                    // Keep original date or update? Let's keep original for now.
+                    // If we wanted to update: news.PublishDate = DateTime.Now;
+
                     _context.Update(news);
                     await _context.SaveChangesAsync();
+                    TempData["Message"] = "Haber başarıyla güncellendi.";
+                    TempData["Type"] = "warning";
                 }
                 catch (DbUpdateConcurrencyException)
                 {
@@ -87,7 +94,7 @@ namespace proj1.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["CategoryId"] = new SelectList(_context.Categories, "Id", "Name", news.CategoryId);
+            ViewBag.Categories = new SelectList(_context.Categories, "Id", "Name", news.CategoryId);
             return View(news);
         }
 
@@ -118,8 +125,25 @@ namespace proj1.Controllers
             {
                 _context.News.Remove(news);
                 await _context.SaveChangesAsync();
+                TempData["Message"] = "Haber başarıyla silindi.";
+                TempData["Type"] = "error";
             }
             return RedirectToAction(nameof(Index));
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> ToggleStatus(int id)
+        {
+            var news = await _context.News.FindAsync(id);
+            if (news == null)
+            {
+                return NotFound();
+            }
+
+            news.IsPublished = !news.IsPublished;
+            await _context.SaveChangesAsync();
+
+            return Ok(new { success = true, message = "Durum güncellendi.", isPublished = news.IsPublished });
         }
 
         private bool NewsExists(int id)

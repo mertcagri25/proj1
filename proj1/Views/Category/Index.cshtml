@@ -5,30 +5,107 @@
     Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
 }
 
-<h1>Categories</h1>
+<div class="container-fluid px-4">
+    <h1 class="mt-4">Kategoriler</h1>
+    <ol class="breadcrumb mb-4">
+        <li class="breadcrumb-item"><a asp-controller="Admin" asp-action="Index">Ana Sayfa</a></li>
+        <li class="breadcrumb-item active">Kategoriler</li>
+    </ol>
 
-<p>
-    <a asp-action="Add" class="btn btn-primary">Create New</a>
-</p>
-<table class="table">
-    <thead>
-        <tr>
-            <th>@Html.DisplayNameFor(model => model.Name)</th>
-            <th>@Html.DisplayNameFor(model => model.IsActive)</th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var item in Model)
-        {
-            <tr>
-                <td>@Html.DisplayFor(modelItem => item.Name)</td>
-                <td>@Html.DisplayFor(modelItem => item.IsActive)</td>
-                <td>
-                    <a asp-action="Update" asp-route-id="@item.Id" class="btn btn-sm btn-warning">Edit</a>
-                    <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-sm btn-danger">Delete</a>
-                </td>
-            </tr>
-        }
-    </tbody>
-</table>
+    <div class="card mb-4">
+        <div class="card-header">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <i class="fas fa-table me-1"></i>
+                    Kategori Listesi
+                </div>
+                <a asp-action="Add" class="btn btn-primary btn-sm"><i class="fas fa-plus me-1"></i> Yeni Ekle</a>
+            </div>
+        </div>
+        <div class="card-body">
+            <table id="datatablesSimple">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Kategori Adı</th>
+                        <th>Durum</th>
+                        <th>İşlemler</th>
+                    </tr>
+                </thead>
+                <tfoot>
+                    <tr>
+                        <th>ID</th>
+                        <th>Kategori Adı</th>
+                        <th>Durum</th>
+                        <th>İşlemler</th>
+                    </tr>
+                </tfoot>
+                <tbody>
+                    @foreach (var category in Model)
+                    {
+                        <tr>
+                            <td>@category.Id</td>
+                            <td>@category.Name</td>
+                            <td>
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" role="switch" id="statusSwitch_@category.Id" 
+                                           @(category.IsActive ? "checked" : "") 
+                                           onchange="toggleCategoryStatus(@category.Id)">
+                                    <label class="form-check-label" for="statusSwitch_@category.Id">
+                                        <span id="statusLabel_@category.Id" class="badge @(category.IsActive ? "bg-success" : "bg-secondary")">
+                                            @(category.IsActive ? "Aktif" : "Pasif")
+                                        </span>
+                                    </label>
+                                </div>
+                            </td>
+                            <td>
+                                <a asp-action="Update" asp-route-id="@category.Id" class="btn btn-warning btn-sm text-white"><i class="fas fa-edit"></i> Düzenle</a>
+                                <a asp-action="Delete" asp-route-id="@category.Id" class="btn btn-danger btn-sm"><i class="fas fa-trash"></i> Sil</a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+    function toggleCategoryStatus(id) {
+        fetch('/Category/ToggleStatus/' + id, {
+            method: 'POST'
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Update Label
+                const label = document.getElementById('statusLabel_' + id);
+                if (data.isActive) {
+                    label.className = 'badge bg-success';
+                    label.innerText = 'Aktif';
+                } else {
+                    label.className = 'badge bg-secondary';
+                    label.innerText = 'Pasif';
+                }
+                
+                // Show Toast
+                Toast.fire({
+                    icon: 'success',
+                    title: data.message
+                });
+            } else {
+                Toast.fire({
+                    icon: 'error',
+                    title: 'Bir hata oluştu.'
+                });
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            Toast.fire({
+                icon: 'error',
+                title: 'Bir hata oluştu.'
+            });
+        });
+    }
+</script>
