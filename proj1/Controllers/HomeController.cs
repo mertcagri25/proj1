@@ -37,6 +37,7 @@ namespace proj1.Controllers
                     .ToListAsync(),
 
                 Categories = await _context.Categories
+                    .Include(c => c.News)
                     .Where(c => c.IsActive)
                     .ToListAsync()
             };

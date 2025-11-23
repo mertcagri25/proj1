@@ -3,10 +3,11 @@ using Microsoft.EntityFrameworkCore;
 using proj1.Data;
 using proj1.Models;
 using Microsoft.AspNetCore.Authorization;
+using proj1.Constants;
 
 namespace proj1.Controllers
 {
-    [Authorize]
+    [Authorize(Roles = Roles.Admin)]
     public class CategoryController : Controller
     {
         private readonly AppDbContext _context;

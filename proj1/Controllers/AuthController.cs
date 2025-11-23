@@ -25,6 +25,15 @@ namespace proj1.Controllers
         [HttpGet]
         public IActionResult Login(string? returnUrl = null)
         {
+            if (User.Identity?.IsAuthenticated == true)
+            {
+                if (User.IsInRole(Roles.Admin))
+                {
+                    return RedirectToAction("Index", "Admin");
+                }
+                return RedirectToAction("Index", "Home");
+            }
+
             ViewData["ReturnUrl"] = returnUrl;
             return View();
         }
@@ -93,12 +102,25 @@ namespace proj1.Controllers
                 return Redirect(returnUrl);
             }
 
-            return RedirectToAction("Index", "Admin");
+            if (user.Role == Roles.Admin)
+            {
+                return RedirectToAction("Index", "Admin");
+            }
+
+            return RedirectToAction("Index", "Home");
         }
 
         [HttpGet]
         public IActionResult Register()
         {
+            if (User.Identity?.IsAuthenticated == true)
+            {
+                if (User.IsInRole(Roles.Admin))
+                {
+                    return RedirectToAction("Index", "Admin");
+                }
+                return RedirectToAction("Index", "Home");
+            }
             return View();
         }
 
@@ -162,7 +184,7 @@ namespace proj1.Controllers
             var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
             await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(identity));
 
-            return RedirectToAction("Index", "Admin");
+            return RedirectToAction("Index", "Home");
         }
 
         [Authorize]
@@ -226,7 +248,12 @@ namespace proj1.Controllers
 
             TempData["Message"] = "Şifre başarıyla güncellendi.";
             TempData["Type"] = "success";
-            return RedirectToAction("Index", "Admin");
+            
+            if (user.Role == Roles.Admin)
+            {
+                return RedirectToAction("Index", "Admin");
+            }
+            return RedirectToAction("Index", "Home");
         }
 
         [HttpGet]
@@ -326,7 +353,12 @@ namespace proj1.Controllers
                 return Redirect(returnUrl);
             }
 
-            return RedirectToAction("Index", "Admin");
+            if (user.Role == Roles.Admin)
+            {
+                return RedirectToAction("Index", "Admin");
+            }
+
+            return RedirectToAction("Index", "Home");
         }
 
         [HttpPost]
