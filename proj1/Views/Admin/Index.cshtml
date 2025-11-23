@@ -1,0 +1,30 @@
+@{
+    ViewData["Title"] = "Dashboard";
+    Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+}
+
+<h1>Admin Dashboard</h1>
+<p>Welcome to the News Portal Admin Panel.</p>
+
+<div class="row">
+    <div class="col-md-4">
+        <div class="card text-white bg-primary mb-3">
+            <div class="card-header">Categories</div>
+            <div class="card-body">
+                <h5 class="card-title">Manage Categories</h5>
+                <p class="card-text">Create, update, and delete news categories.</p>
+                <a asp-controller="Category" asp-action="Index" class="btn btn-light">Go to Categories</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card text-white bg-success mb-3">
+            <div class="card-header">News</div>
+            <div class="card-body">
+                <h5 class="card-title">Manage News</h5>
+                <p class="card-text">Publish and manage news articles.</p>
+                <a asp-controller="News" asp-action="Index" class="btn btn-light">Go to News</a>
+            </div>
+        </div>
+    </div>
+</div>
