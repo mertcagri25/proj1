@@ -1,0 +1,162 @@
+@{
+    ViewData["Title"] = "Giriş Yap";
+    Layout = null;
+}
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Haber Portalı</title>
+    <link href="~/lib/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" />
+    <style>
+        body, html { height: 100%; margin: 0; overflow-x: hidden; }
+        .auth-container { min-height: 100vh; display: flex; }
+        .auth-sidebar {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem;
+        }
+        .auth-form-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #f8f9fa;
+        }
+        .auth-card {
+            width: 100%;
+            max-width: 450px;
+            padding: 2rem;
+            background: white;
+            border-radius: 1rem;
+            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.1);
+        }
+        .btn-google {
+            background-color: #fff;
+            color: #757575;
+            border: 1px solid #ddd;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+        .btn-google:hover {
+            background-color: #f1f1f1;
+            border-color: #ccc;
+        }
+        .divider {
+            display: flex;
+            align-items: center;
+            text-align: center;
+            margin: 1.5rem 0;
+            color: #6c757d;
+        }
+        .divider::before, .divider::after {
+            content: '';
+            flex: 1;
+            border-bottom: 1px solid #dee2e6;
+        }
+        .divider span { padding: 0 0.5rem; font-size: 0.9rem; }
+    </style>
+</head>
+<body>
+    <div class="container-fluid p-0">
+        <div class="row g-0 auth-container">
+            <!-- Left Side: Branding -->
+            <div class="col-lg-6 d-none d-lg-flex auth-sidebar">
+                <div class="text-center">
+                    <h1 class="display-4 fw-bold mb-4">Haber Portalı</h1>
+                    <p class="lead mb-0">En güncel haberlere anında ulaşın.</p>
+                </div>
+            </div>
+            
+            <!-- Right Side: Form -->
+            <div class="col-lg-6 auth-form-container">
+                <div class="auth-card">
+                    <div class="text-center mb-4">
+                        <h2 class="fw-bold">Hoş Geldiniz</h2>
+                        <p class="text-muted">Hesabınıza giriş yapın</p>
+                    </div>
+
+                    <form asp-action="Login" method="post">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="returnUrl" value="@ViewData["ReturnUrl"]" />
+                        
+                        <div class="form-floating mb-3">
+                            <input class="form-control" id="username" name="username" type="text" placeholder="Kullanıcı Adı" required autofocus />
+                            <label for="username">Kullanıcı Adı</label>
+                        </div>
+                        <div class="form-floating mb-3">
+                            <input class="form-control" id="password" name="password" type="password" placeholder="Şifre" required />
+                            <label for="password">Şifre</label>
+                        </div>
+                        
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="rememberMe">
+                                <label class="form-check-label small" for="rememberMe">Beni Hatırla</label>
+                            </div>
+                            <a asp-action="ChangePassword" asp-controller="Auth" class="small text-decoration-none">Şifremi Unuttum?</a>
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary btn-lg">Giriş Yap</button>
+                        </div>
+                    </form>
+
+                    <div class="divider">
+                        <span>veya</span>
+                    </div>
+
+                    <div class="d-grid gap-2">
+                        <a asp-action="ExternalLogin" asp-route-provider="Google" asp-route-returnUrl="@ViewData["ReturnUrl"]" class="btn btn-google btn-lg">
+                            <img src="https://www.svgrepo.com/show/475656/google-color.svg" alt="Google" width="20" height="20">
+                            Google ile Giriş Yap
+                        </a>
+                    </div>
+
+                    <div class="text-center mt-4">
+                        <p class="small mb-0">Hesabınız yok mu? <a asp-action="Register" class="text-decoration-none fw-bold">Kayıt Olun</a></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        const Toast = Swal.mixin({
+            toast: true,
+            position: 'top-end',
+            showConfirmButton: false,
+            timer: 3000,
+            timerProgressBar: true,
+            didOpen: (toast) => {
+                toast.addEventListener('mouseenter', Swal.stopTimer)
+                toast.addEventListener('mouseleave', Swal.resumeTimer)
+            }
+        });
+
+        @if (TempData["Message"] != null)
+        {
+            var type = TempData["Type"]?.ToString() ?? "success";
+            <text>
+                Toast.fire({
+                    icon: '@type',
+                    title: '@TempData["Message"]'
+                });
+            </text>
+        }
+    </script>
+</body>
+</html>

@@ -1,5 +1,6 @@
 using System;
 using System.ComponentModel.DataAnnotations;
+using proj1.Constants;
 
 namespace proj1.Models
 {
@@ -17,7 +18,7 @@ namespace proj1.Models
         [Required]
         public string PasswordHash { get; set; } = string.Empty;
 
-        public string Role { get; set; } = "User"; // 'Admin' or 'Editor'
+        public string Role { get; set; } = Roles.User; // 'Admin' or 'Editor'
 
         public DateTime CreatedAt { get; set; } = DateTime.Now;
     }

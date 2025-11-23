@@ -2,9 +2,11 @@ using Microsoft.AspNetCore.Mvc;
 using proj1.Data;
 using proj1.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Authorization;
 
 namespace proj1.Controllers
 {
+    [Authorize]
     public class UserController : Controller
     {
         private readonly AppDbContext _context;

@@ -3,9 +3,11 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using proj1.Data;
 using proj1.Models;
+using Microsoft.AspNetCore.Authorization;
 
 namespace proj1.Controllers
 {
+    [Authorize]
     public class NewsController : Controller
     {
         private readonly AppDbContext _context;
@@ -73,10 +75,20 @@ namespace proj1.Controllers
             {
                 try
                 {
-                    // Keep original date or update? Let's keep original for now.
-                    // If we wanted to update: news.PublishDate = DateTime.Now;
+                    var existingNews = await _context.News.FindAsync(id);
+                    if (existingNews == null)
+                    {
+                        return NotFound();
+                    }
 
-                    _context.Update(news);
+                    existingNews.Title = news.Title;
+                    existingNews.Content = news.Content;
+                    existingNews.ImageUrl = news.ImageUrl;
+                    existingNews.CategoryId = news.CategoryId;
+                    existingNews.IsPublished = news.IsPublished;
+                    // PublishDate is preserved
+
+                    _context.Update(existingNews);
                     await _context.SaveChangesAsync();
                     TempData["Message"] = "Haber başarıyla güncellendi.";
                     TempData["Type"] = "warning";
